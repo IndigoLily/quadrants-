@@ -3,19 +3,43 @@ const c = canvas.getContext('2d');
 
 let width  = canvas.width  = window.innerWidth;
 let height = canvas.height = window.innerHeight;
+let sep = 0.6;
+let speed = 3;
 
 const PI = Math.PI;
 const TAU = PI * 2;
 
-const COLOURS = [
+c.shadowColor = '#000';
+
+var COLOURS = [
   '#e34',
   '#06f',
   '#fff',
-  '#000',
+  '#111',
 ]
+let circles = [];
 
-c.shadowBlur = 10;
-c.shadowColor = '#000';
+function randColour() {
+  let r = (Math.random()*16|0).toString(16),
+      g = (Math.random()*16|0).toString(16),
+      b = (Math.random()*16|0).toString(16);
+  if (Math.random() > .2) return '#'+r+g+b;
+  else return '#'+r+r+r;
+}
+
+window.addEventListener('click', () => {
+  width  = canvas.width  = window.innerWidth;
+  height = canvas.height = window.innerHeight;
+  sep = 0.6 + Math.random() * 0.5;
+  c.shadowColor = '#000';
+  circles = [];
+  COLOURS = [
+    randColour(),
+    randColour(),
+    randColour(),
+    randColour(),
+  ]
+});
 
 function shuffle(array) {
   let copy = [...array], out = [];
@@ -26,13 +50,13 @@ function shuffle(array) {
   return out;
 }
 
-function drawQuadrants(x, y, r = 20, a = 0) {
+function drawQuadrants(x, y, r, a) {
   let colours = shuffle(COLOURS);
 
   c.save();
   c.translate(x, y);
   c.rotate(a);
-  c.shadowBlur = r**.75;
+  c.shadowBlur = r**.65;
   for(let i = 0; i < 4; i++) {
     c.fillStyle = colours[i];
     let a = TAU/4 * i;
@@ -45,19 +69,12 @@ function drawQuadrants(x, y, r = 20, a = 0) {
   c.restore();
 }
 
-let circles = [];
-
-Array.prototype.min = function() {
-  this.reduce( (min,val) => val < min ? val : min, Infinity );
-}
-
 function dist(x1, y1, x2, y2) {
   return Math.hypot(x1-x2, y1-y2);
 }
 
 function draw() {
-  let n = circles.length**.5 + 1;
-  for(let i = 0; i < n; i++) {
+  for(let i = 0; i < speed; i++) {
     let x = Math.random() * width,
         y = Math.random() * height,
         a = Math.random() * TAU;
@@ -81,11 +98,12 @@ function draw() {
     if (y < min) min = y;
     if (height - y < min) min = height - y;
 
-    r = min * .5;
+    r = min * sep;
 
     drawQuadrants(x, y, r, a);
     circles.push({x: x, y: y, r: r});
   }
   requestAnimationFrame(draw);
 }
+
 draw();
