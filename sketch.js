@@ -51,25 +51,41 @@ function resize() {
 }
 
 window.addEventListener('keydown', e => {
-  console.log(e.keyCode);
-  if (e.keyCode === 38) speed++; // up
-  else if (e.keyCode === 40) speed > 1 ? speed-- : speed = 1; // down
-  else if (e.keyCode === 83) { // s(hadow)
-    shadow = !shadow;
-    resize();
-  } else if (e.keyCode === 82) { // r(esize)
-    resize();
-  } else if (e.keyCode === 67) { // c(olour)
-    resize();
-    COLOURS = [
-      randColour(),
-      randColour(),
-      randColour(),
-      randColour(),
-    ];
-  } else if (e.keyCode === 80) { // p (separation)
-    resize();
-    sep = 0.4 + Math.random() * 0.7;
+  switch(e.keyCode) {
+    case 38: // up
+      speed++;
+      break;
+
+    case 40: // down
+      if (speed > 1) speed--;
+      break;
+
+    case 82: // r(esize)
+      resize();
+      break;
+
+    case 83: // s(hadow)
+      shadow = !shadow;
+      resize();
+      break;
+
+    case 80: // p (separation)
+      resize();
+      sep = 0.4 + Math.random() * 0.7;
+      break;
+
+    case 67: // c(olour)
+      resize();
+      COLOURS = [
+        randColour(),
+        randColour(),
+        randColour(),
+        randColour(),
+      ];
+      break;
+
+    default:
+      console.log(e.keyCode);
   }
 });
 
