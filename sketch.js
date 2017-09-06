@@ -3,20 +3,21 @@ const c = canvas.getContext('2d');
 
 let width  = canvas.width  = window.innerWidth;
 let height = canvas.height = window.innerHeight;
-let sep = 0.6;
-let speed = 3;
+let sep = 0.5;
+let speed = 1;
+let shadow = true;
 
 const PI = Math.PI;
 const TAU = PI * 2;
 
-c.shadowColor = '#000';
+c.shadowColor = 'rgba(0, 0, 0, 0.5)';
 
 var COLOURS = [
   '#e34',
   '#06f',
   '#fff',
   '#111',
-]
+];
 let circles = [];
 
 function randColour() {
@@ -27,18 +28,49 @@ function randColour() {
   else return '#'+r+r+r;
 }
 
-window.addEventListener('click', () => {
+/*window.addEventListener('click', () => {
   width  = canvas.width  = window.innerWidth;
   height = canvas.height = window.innerHeight;
-  sep = 0.6 + Math.random() * 0.5;
-  c.shadowColor = '#000';
+  sep = 0.4 + Math.random() * 0.7;
+  c.shadowColor = shadow ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0)';
   circles = [];
   COLOURS = [
     randColour(),
     randColour(),
     randColour(),
     randColour(),
-  ]
+  ];
+});*/
+
+function resize() {
+  c.clearRect(0,0,width,height);
+  width  = canvas.width  = window.innerWidth;
+  height = canvas.height = window.innerHeight;
+  c.shadowColor = shadow ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0)';
+  circles = [];
+}
+
+window.addEventListener('keydown', e => {
+  console.log(e.keyCode);
+  if (e.keyCode === 38) speed++; // up
+  else if (e.keyCode === 40) speed > 1 ? speed-- : speed = 1; // down
+  else if (e.keyCode === 83) { // s(hadow)
+    shadow = !shadow;
+    resize();
+  } else if (e.keyCode === 82) { // r(esize)
+    resize();
+  } else if (e.keyCode === 67) { // c(olour)
+    resize();
+    COLOURS = [
+      randColour(),
+      randColour(),
+      randColour(),
+      randColour(),
+    ];
+  } else if (e.keyCode === 80) { // p (separation)
+    resize();
+    sep = 0.4 + Math.random() * 0.7;
+  }
 });
 
 function shuffle(array) {
@@ -56,15 +88,17 @@ function drawQuadrants(x, y, r, a) {
   c.save();
   c.translate(x, y);
   c.rotate(a);
-  c.shadowBlur = r**.65;
   for(let i = 0; i < 4; i++) {
-    c.fillStyle = colours[i];
+    c.strokeStyle = c.fillStyle = colours[i];
+    c.shadowBlur = r**.5;
     let a = TAU/4 * i;
 
     c.beginPath();
     c.arc(0, 0, r, a, a + TAU/4);
     c.lineTo(0, 0);
     c.fill();
+    c.shadowBlur = 0;
+    c.stroke();
   }
   c.restore();
 }
@@ -79,7 +113,7 @@ function draw() {
         y = Math.random() * height,
         a = Math.random() * TAU;
 
-    let min = Infinity; // has to be declared outside of loop so I can use it later
+    let min = Infinity;
     for(let j = 0; j < circles.length; j++) {
       let it = circles[j];
       let d = dist(it.x, it.y, x, y);
