@@ -3,7 +3,7 @@ const c = canvas.getContext('2d');
 
 let width  = canvas.width  = window.innerWidth;
 let height = canvas.height = window.innerHeight;
-let sep = 0.5;
+let sep = .5;
 let speed = 1;
 let shadow = true;
 
@@ -46,7 +46,6 @@ function resize() {
   c.clearRect(0,0,width,height);
   width  = canvas.width  = window.innerWidth;
   height = canvas.height = window.innerHeight;
-  c.shadowColor = shadow ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0)';
   circles = [];
 }
 
@@ -65,23 +64,35 @@ window.addEventListener('keydown', e => {
       break;
 
     case 83: // s(hadow)
+      c.clearRect(0,0,width,height);
+
       shadow = !shadow;
-      resize();
+
+      circles.forEach(x => {
+        drawQuadrants(x.x, x.y, x.r, x.a, x.c);
+      });
       break;
 
     case 80: // p (separation)
       resize();
-      sep = 0.4 + Math.random() * 0.7;
+      sep = 0.5 + Math.random();
       break;
 
     case 67: // c(olour)
-      resize();
+      c.clearRect(0,0,width,height);
+
       COLOURS = [
         randColour(),
         randColour(),
         randColour(),
         randColour(),
       ];
+
+      circles.forEach(x => {
+        let c = shuffle(COLOURS);
+        x.c = c;
+        drawQuadrants(x.x, x.y, x.r, x.a, x.c);
+      });
       break;
 
     default:
@@ -98,15 +109,14 @@ function shuffle(array) {
   return out;
 }
 
-function drawQuadrants(x, y, r, a) {
-  let colours = shuffle(COLOURS);
-
+function drawQuadrants(x, y, r, a, colours) {
   c.save();
   c.translate(x, y);
   c.rotate(a);
   for(let i = 0; i < 4; i++) {
     c.strokeStyle = c.fillStyle = colours[i];
     c.shadowBlur = r**.5;
+    c.shadowColor = shadow ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0)';
     let a = TAU/4 * i;
 
     c.beginPath();
@@ -127,7 +137,8 @@ function draw() {
   for(let i = 0; i < speed; i++) {
     let x = Math.random() * width,
         y = Math.random() * height,
-        a = Math.random() * TAU;
+        a = Math.random() * TAU,
+        c = shuffle(COLOURS);
 
     let min = Infinity;
     for(let j = 0; j < circles.length; j++) {
@@ -150,8 +161,9 @@ function draw() {
 
     r = min * sep;
 
-    drawQuadrants(x, y, r, a);
-    circles.push({x: x, y: y, r: r});
+    drawQuadrants(x, y, r, a, c);
+    circles.push({x: x, y: y, r: r, a: a, c: c});
+    circles.sort((a,b) => b.r - a.r);
   }
   requestAnimationFrame(draw);
 }
